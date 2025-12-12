@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10點半 (Ten and a Half) - 網頁版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .rules {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .betting-area {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .betting-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .balance-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .balance-amount {
+            color: #4CAF50;
+            font-size: 1.5rem;
+        }
+
+        .bet-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .bet-input-group label {
+            font-weight: bold;
+        }
+
+        .bet-input-group input {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            width: 120px;
+        }
+
+        .quick-bet-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .quick-bet-btn {
+            padding: 8px 15px;
+            background: #ff9800;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .quick-bet-btn:hover:not(:disabled) {
+            background: #f57c00;
+        }
+
+        .quick-bet-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .hand-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hand-section h2 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .cards-container {
+            min-height: 150px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .card {
+            width: 80px;
+            height: 120px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: cardDeal 0.3s ease-out;
+        }
+
+        @keyframes cardDeal {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card.red {
+            color: #e74c3c;
+        }
+
+        .card.black {
+            color: #2c3e50;
+        }
+
+        .card-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .card-suit {
+            font-size: 2rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .score {
+            font-size: 1.2rem;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .score.bust {
+            color: #e74c3c;
+        }
+
+        .score.win {
+            color: #FFD700;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #newGameBtn {
+            background: #2ecc71;
+            color: white;
+        }
+
+        #newGameBtn:hover:not(:disabled) {
+            background: #27ae60;
+        }
+
+        #dealBtn {
+            background: #3498db;
+            color: white;
+        }
+
+        #dealBtn:hover:not(:disabled) {
+            background: #2980b9;
+        }
+
+        #hitBtn {
+            background: #e67e22;
+            color: white;
+        }
+
+        #hitBtn:hover:not(:disabled) {
+            background: #d35400;
+        }
+
+        #standBtn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        #standBtn:hover:not(:disabled) {
+            background: #c0392b;
+        }
+
+        .message-area {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            min-height: 200px;
+        }
+
+        .message-area h3 {
+            margin-bottom: 15px;
+        }
+
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+
+        .log-entry.win {
+            border-left-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.2);
+        }
+
+        .log-entry.lose {
+            border-left-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .log-entry.special {
+            border-left-color: #f39c12;
+            background: rgba(243, 156, 18, 0.2);
+        }
+
+        .result-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .result-display.win {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .result-display.lose {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .result-display.special {
+            background: #f39c12;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .betting-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎲 10點半 (Ten and a Half) 🎲</h1>
+            <div class="rules">
+                <p><strong>遊戲規則：</strong>目標是讓手牌點數接近10.5但不超過。A-10為牌面數字，J/Q/K為半點(0.5)。
+                玩家先下注，然後發牌。玩家可以要牌，但超過10.5就「爆煲」立即輸掉。
+                特殊規則：起手兩張牌為10.5點（10+J/Q/K）或五張牌未爆（過五關）莊家立賠！點數相同時莊家勝（食夾棍）。</p>
+            </div>
+        </header>
+
+        <div class="betting-area">
+            <div class="betting-controls">
+                <div class="balance-display">
+                    餘額: $<span class="balance-amount" id="balance">1000</span>
+                </div>
+                <div class="bet-input-group">
+                    <label for="betInput">下注金額:</label>
+                    <input type="number" id="betInput" min="10" max="1000" value="50" step="10">
+                </div>
+                <div class="quick-bet-buttons">
+                    <button class="quick-bet-btn" onclick="setBet(10)">$10</button>
+                    <button class="quick-bet-btn" onclick="setBet(50)">$50</button>
+                    <button class="quick-bet-btn" onclick="setBet(100)">$100</button>
+                    <button class="quick-bet-btn" onclick="setBet(500)">$500</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="hand-section">
+                <h2>🎩 莊家</h2>
+                <div class="cards-container" id="dealerCards"></div>
+                <div class="score" id="dealerScoreDisplay">點數: <span id="dealerScore">0</span></div>
+            </div>
+
+            <div class="hand-section">
+                <h2>👤 閒家（玩家）</h2>
+                <div class="cards-container" id="playerCards"></div>
+                <div class="score" id="playerScoreDisplay">點數: <span id="playerScore">0</span></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="btn-group">
+                <button id="newGameBtn" onclick="newGame()">新遊戲</button>
+                <button id="dealBtn" onclick="deal()">發牌</button>
+                <button id="hitBtn" onclick="hit()" disabled>要牌</button>
+                <button id="standBtn" onclick="stand()" disabled>停牌</button>
+            </div>
+        </div>
+
+        <div class="message-area">
+            <h3>📋 遊戲紀錄</h3>
+            <div class="log-container" id="logContainer"></div>
+            <div id="resultDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 遊戲狀態 =====
+        const GamePhase = {
+            INIT: 'init',
+            PLAYER_TURN: 'playerTurn',
+            DEALER_TURN: 'dealerTurn',
+            FINISHED: 'finished'
+        };
+
+        let gameState = {
+            phase: GamePhase.INIT,
+            deck: [],
+            playerCards: [],
+            dealerCards: [],
+            log: [],
+            balance: 1000,
+            currentBet: 0
+        };
+
+        // ===== 牌組相關函式 =====
+        function buildDeck() {
+            const suits = ['S', 'H', 'D', 'C'];
+            const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const deck = [];
+
+            for (const suit of suits) {
+                for (const rank of ranks) {
+                    deck.push({ suit, rank });
+                }
+            }
+
+            return deck;
+        }
+
+        function shuffle(deck) {
+            const shuffled = [...deck];
+            
+            const getRandomInt = (max) => {
+                if (window.crypto && window.crypto.getRandomValues) {
+                    const array = new Uint32Array(1);
+                    window.crypto.getRandomValues(array);
+                    return array[0] % max;
+                }
+                return Math.floor(Math.random() * max);
+            };
+
+            // Fisher-Yates shuffle
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = getRandomInt(i + 1);
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            return shuffled;
+        }
+
+        function draw(deck) {
+            if (deck.length === 0) {
+                addLog('牌堆不足，重新洗牌！');
+                return null;
+            }
+            return deck.pop();
+        }
+
+        // ===== 計分函式（10點半規則）=====
+        function scoreHand(cards) {
+            if (cards.length === 0) {
+                return { total: 0, isBust: false, isTenHalf: false, isFiveCard: false };
+            }
+
+            let total = 0;
+
+            for (const card of cards) {
+                if (card.rank === 'A') {
+                    total += 1;
+                } else if (['J', 'Q', 'K'].includes(card.rank)) {
+                    total += 0.5;
+                } else {
+                    total += parseInt(card.rank);
+                }
+            }
+
+            const isBust = total > 10.5;
+            // 10點半：剛好兩張牌，一張10點+一張半點(J/Q/K)
+            const isTenHalf = cards.length === 2 && total === 10.5 && 
+                             cards.some(c => c.rank === '10') && 
+                             cards.some(c => ['J', 'Q', 'K'].includes(c.rank));
+            // 過五關：五張牌且未爆煲
+            const isFiveCard = cards.length === 5 && !isBust;
+
+            return { total, isBust, isTenHalf, isFiveCard };
+        }
+
+        function dealerShouldHit() {
+            // 莊家沒有固定規則，這裡設定簡單策略：<= 8點要牌
+            const dealerScore = scoreHand(gameState.dealerCards);
+            return dealerScore.total <= 8;
+        }
+
+        // ===== 結算函式 =====
+        function settle(playerScore, dealerScore) {
+            // 玩家爆牌
+            if (playerScore.isBust) {
+                return { result: 'LOSE', message: '玩家爆煲！' };
+            }
+
+            // 玩家10點半（特殊）
+            if (playerScore.isTenHalf) {
+                return { result: 'TEN_HALF', message: '玩家10點半！莊家立賠' };
+            }
+
+            // 玩家過五關（特殊）
+            if (playerScore.isFiveCard) {
+                return { result: 'FIVE_CARD', message: '玩家過五關！莊家立賠' };
+            }
+
+            // 莊家爆牌
+            if (dealerScore.isBust) {
+                return { result: 'WIN', message: '莊家爆煲！玩家勝利' };
+            }
+
+            // 比較點數
+            if (playerScore.total > dealerScore.total) {
+                return { result: 'WIN', message: `玩家勝利！玩家 ${playerScore.total} vs 莊家 ${dealerScore.total}` };
+            } else if (playerScore.total < dealerScore.total) {
+                return { result: 'LOSE', message: `莊家勝利！玩家 ${playerScore.total} vs 莊家 ${dealerScore.total}` };
+            } else {
+                // 點數相同，莊家勝（食夾棍）
+                return { result: 'TIE', message: `點數相同！莊家勝（食夾棍）玩家 ${playerScore.total} vs 莊家 ${dealerScore.total}` };
+            }
+        }
+
+        // ===== UI 更新函式 =====
+        function getSuitSymbol(suit) {
+            const symbols = {
+                'S': '♠',
+                'H': '♥',
+                'D': '♦',
+                'C': '♣'
+            };
+            return symbols[suit];
+        }
+
+        function getSuitColor(suit) {
+            return (suit === 'H' || suit === 'D') ? 'red' : 'black';
+        }
+
+        function renderCards(cards, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            for (const card of cards) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = `card ${getSuitColor(card.suit)}`;
+                
+                const rankSpan = document.createElement('span');
+                rankSpan.className = 'card-rank';
+                rankSpan.textContent = card.rank;
+                
+                const suitSpan = document.createElement('span');
+                suitSpan.className = 'card-suit';
+                suitSpan.textContent = getSuitSymbol(card.suit);
+                
+                cardDiv.appendChild(rankSpan);
+                cardDiv.appendChild(suitSpan);
+                container.appendChild(cardDiv);
+            }
+        }
+
+        function updateScores() {
+            const playerScore = scoreHand(gameState.playerCards);
+            const dealerScore = scoreHand(gameState.dealerCards);
+
+            const playerScoreEl = document.getElementById('playerScore');
+            const dealerScoreEl = document.getElementById('dealerScore');
+            const playerScoreDisplay = document.getElementById('playerScoreDisplay');
+            const dealerScoreDisplay = document.getElementById('dealerScoreDisplay');
+
+            playerScoreEl.textContent = playerScore.total;
+            dealerScoreEl.textContent = dealerScore.total;
+
+            // 更新樣式
+            playerScoreDisplay.className = 'score';
+            dealerScoreDisplay.className = 'score';
+
+            if (playerScore.isBust) {
+                playerScoreDisplay.classList.add('bust');
+            } else if (playerScore.isTenHalf || playerScore.isFiveCard) {
+                playerScoreDisplay.classList.add('win');
+            }
+
+            if (dealerScore.isBust) {
+                dealerScoreDisplay.classList.add('bust');
+            }
+        }
+
+        function updateBalance() {
+            document.getElementById('balance').textContent = gameState.balance;
+        }
+
+        function addLog(message, type = 'info') {
+            gameState.log.push({ message, type });
+            const logContainer = document.getElementById('logContainer');
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = message;
+            
+            logContainer.insertBefore(logEntry, logContainer.firstChild);
+        }
+
+        function showResult(result, payout = 0) {
+            const resultDisplay = document.getElementById('resultDisplay');
+            
+            let message = '';
+            let className = 'result-display ';
+
+            if (result === 'WIN') {
+                message = `🎉 你贏了！獲得 $${payout}`;
+                className += 'win';
+            } else if (result === 'TEN_HALF') {
+                message = `🎊 10點半！獲得 $${payout}`;
+                className += 'special';
+            } else if (result === 'FIVE_CARD') {
+                message = `🏆 過五關！獲得 $${payout}`;
+                className += 'special';
+            } else if (result === 'LOSE' || result === 'TIE') {
+                message = `😢 你輸了！損失 $${gameState.currentBet}`;
+                className += 'lose';
+            }
+            
+            resultDisplay.className = className;
+            resultDisplay.textContent = message;
+            resultDisplay.style.display = 'block';
+        }
+
+        function clearResult() {
+            const resultDisplay = document.getElementById('resultDisplay');
+            resultDisplay.textContent = '';
+            resultDisplay.style.display = 'none';
+        }
+
+        function updateButtons() {
+            const newGameBtn = document.getElementById('newGameBtn');
+            const dealBtn = document.getElementById('dealBtn');
+            const hitBtn = document.getElementById('hitBtn');
+            const standBtn = document.getElementById('standBtn');
+            const betInput = document.getElementById('betInput');
+            const quickBetBtns = document.querySelectorAll('.quick-bet-btn');
+
+            switch (gameState.phase) {
+                case GamePhase.INIT:
+                    newGameBtn.disabled = false;
+                    dealBtn.disabled = false;
+                    hitBtn.disabled = true;
+                    standBtn.disabled = true;
+                    betInput.disabled = false;
+                    quickBetBtns.forEach(btn => btn.disabled = false);
+                    break;
+                
+                case GamePhase.PLAYER_TURN:
+                    newGameBtn.disabled = true;
+                    dealBtn.disabled = true;
+                    hitBtn.disabled = false;
+                    standBtn.disabled = false;
+                    betInput.disabled = true;
+                    quickBetBtns.forEach(btn => btn.disabled = true);
+                    break;
+                
+                case GamePhase.DEALER_TURN:
+                    newGameBtn.disabled = true;
+                    dealBtn.disabled = true;
+                    hitBtn.disabled = true;
+                    standBtn.disabled = true;
+                    betInput.disabled = true;
+                    quickBetBtns.forEach(btn => btn.disabled = true);
+                    break;
+                
+                case GamePhase.FINISHED:
+                    newGameBtn.disabled = false;
+                    dealBtn.disabled = false;
+                    hitBtn.disabled = true;
+                    standBtn.disabled = true;
+                    betInput.disabled = false;
+                    quickBetBtns.forEach(btn => btn.disabled = false);
+                    break;
+            }
+        }
+
+        // ===== 遊戲流程函式 =====
+        function newGame() {
+            gameState.phase = GamePhase.INIT;
+            gameState.deck = shuffle(buildDeck());
+            gameState.playerCards = [];
+            gameState.dealerCards = [];
+            gameState.log = [];
+            gameState.currentBet = 0;
+
+            renderCards([], 'playerCards');
+            renderCards([], 'dealerCards');
+            document.getElementById('playerScore').textContent = '0';
+            document.getElementById('dealerScore').textContent = '0';
+            document.getElementById('playerScoreDisplay').className = 'score';
+            document.getElementById('dealerScoreDisplay').className = 'score';
+            document.getElementById('logContainer').innerHTML = '';
+            clearResult();
+
+            addLog('遊戲已重置，請下注並按發牌開始新局');
+            updateButtons();
+        }
+
+        function validateBet() {
+            const betInput = document.getElementById('betInput');
+            let betAmount = parseInt(betInput.value);
+
+            if (isNaN(betAmount) || betAmount < 10) {
+                alert('下注金額至少為 $10');
+                return false;
+            }
+
+            if (betAmount > gameState.balance) {
+                alert(`餘額不足！目前餘額: $${gameState.balance}`);
+                return false;
+            }
+
+            return betAmount;
+        }
+
+        function deal() {
+            if (gameState.phase !== GamePhase.INIT) {
+                addLog('無法發牌：遊戲進行中');
+                return;
+            }
+
+            const betAmount = validateBet();
+            if (!betAmount) return;
+
+            // 扣除下注金額
+            gameState.currentBet = betAmount;
+            gameState.balance -= betAmount;
+            updateBalance();
+            addLog(`閒家下注 $${betAmount}`);
+
+            // 發初始牌給玩家（只發一張，明牌）
+            gameState.playerCards.push(draw(gameState.deck));
+
+            renderCards(gameState.playerCards, 'playerCards');
+            updateScores();
+
+            const playerScore = scoreHand(gameState.playerCards);
+            addLog(`閒家發牌：${playerScore.total}點`);
+
+            // 進入玩家回合
+            gameState.phase = GamePhase.PLAYER_TURN;
+            addLog('閒家回合：選擇要牌或停牌');
+            updateButtons();
+        }
+
+        function hit() {
+            if (gameState.phase !== GamePhase.PLAYER_TURN) {
+                return;
+            }
+
+            const card = draw(gameState.deck);
+            if (!card) {
+                gameState.deck = shuffle(buildDeck());
+                return hit();
+            }
+
+            gameState.playerCards.push(card);
+            renderCards(gameState.playerCards, 'playerCards');
+            updateScores();
+
+            const playerScore = scoreHand(gameState.playerCards);
+            addLog(`閒家要牌: ${card.rank}${getSuitSymbol(card.suit)} (總點數: ${playerScore.total})`);
+
+            // 檢查特殊情況
+            if (playerScore.isTenHalf) {
+                // 10點半，莊家立賠
+                gameState.phase = GamePhase.FINISHED;
+                const payout = Math.floor(gameState.currentBet * 2.5); // 特殊賠率
+                gameState.balance += payout;
+                updateBalance();
+                addLog(`閒家10點半！莊家立賠 $${payout}`, 'special');
+                showResult('TEN_HALF', payout);
+                updateButtons();
+                return;
+            }
+
+            if (playerScore.isFiveCard) {
+                // 過五關，莊家立賠
+                gameState.phase = GamePhase.FINISHED;
+                const payout = Math.floor(gameState.currentBet * 3); // 特殊賠率
+                gameState.balance += payout;
+                updateBalance();
+                addLog(`閒家過五關！莊家立賠 $${payout}`, 'special');
+                showResult('FIVE_CARD', payout);
+                updateButtons();
+                return;
+            }
+
+            if (playerScore.isBust) {
+                // 爆煲，立即輸
+                gameState.phase = GamePhase.FINISHED;
+                addLog(`閒家爆煲！(${playerScore.total}點)`, 'lose');
+                showResult('LOSE');
+                updateButtons();
+            }
+        }
+
+        function stand() {
+            if (gameState.phase !== GamePhase.PLAYER_TURN) {
+                return;
+            }
+
+            gameState.phase = GamePhase.DEALER_TURN;
+            addLog('閒家停牌，莊家開始要牌');
+            updateButtons();
+
+            // 莊家要牌
+            setTimeout(dealerPlay, 500);
+        }
+
+        function dealerPlay() {
+            // 莊家發初始牌
+            if (gameState.dealerCards.length === 0) {
+                gameState.dealerCards.push(draw(gameState.deck));
+                renderCards(gameState.dealerCards, 'dealerCards');
+                updateScores();
+                const dealerScore = scoreHand(gameState.dealerCards);
+                addLog(`莊家發牌: ${dealerScore.total}點`);
+            }
+
+            let dealerScore = scoreHand(gameState.dealerCards);
+
+            while (dealerShouldHit()) {
+                const card = draw(gameState.deck);
+                if (!card) {
+                    gameState.deck = shuffle(buildDeck());
+                    return dealerPlay();
+                }
+
+                gameState.dealerCards.push(card);
+                renderCards(gameState.dealerCards, 'dealerCards');
+                updateScores();
+
+                dealerScore = scoreHand(gameState.dealerCards);
+                addLog(`莊家要牌: ${card.rank}${getSuitSymbol(card.suit)} (總點數: ${dealerScore.total})`);
+
+                if (dealerScore.isBust) {
+                    addLog(`莊家爆煲！(${dealerScore.total}點)`, 'win');
+                    break;
+                }
+            }
+
+            if (!dealerScore.isBust) {
+                addLog(`莊家停牌 (${dealerScore.total}點)`);
+            }
+
+            // 結算
+            setTimeout(finishGame, 500);
+        }
+
+        function finishGame() {
+            gameState.phase = GamePhase.FINISHED;
+
+            const playerScore = scoreHand(gameState.playerCards);
+            const dealerScore = scoreHand(gameState.dealerCards);
+            const settlement = settle(playerScore, dealerScore);
+
+            let payout = 0;
+            if (settlement.result === 'WIN') {
+                payout = gameState.currentBet * 2;
+                gameState.balance += payout;
+                addLog(settlement.message, 'win');
+                showResult('WIN', payout);
+            } else if (settlement.result === 'TEN_HALF') {
+                payout = Math.floor(gameState.currentBet * 2.5);
+                gameState.balance += payout;
+                addLog(settlement.message, 'special');
+                showResult('TEN_HALF', payout);
+            } else if (settlement.result === 'FIVE_CARD') {
+                payout = Math.floor(gameState.currentBet * 3);
+                gameState.balance += payout;
+                addLog(settlement.message, 'special');
+                showResult('FIVE_CARD', payout);
+            } else if (settlement.result === 'LOSE' || settlement.result === 'TIE') {
+                addLog(settlement.message, 'lose');
+                showResult(settlement.result);
+            }
+
+            updateBalance();
+            updateButtons();
+        }
+
+        // ===== 下注快捷按鈕 =====
+        function setBet(amount) {
+            const betInput = document.getElementById('betInput');
+            if (amount <= gameState.balance) {
+                betInput.value = amount;
+            } else {
+                betInput.value = gameState.balance;
+                alert(`餘額不足！已設定為最大金額: $${gameState.balance}`);
+            }
+        }
+
+        // ===== 初始化 =====
+        window.onload = function() {
+            newGame();
+            addLog('歡迎來到10點半遊戲！');
+            addLog('請設定下注金額後按「發牌」開始遊戲');
+        };
+    </script>
+</body>
+</html>
